@@ -1,3 +1,19 @@
+# ref: https://www.rfc-editor.org/rfc/rfc7919#appendix-A.1
+# ref: https://www.rfc-editor.org/rfc/rfc8446#appendix-B.3.2
+# ref: https://owasp.org/www-chapter-london/assets/slides/OWASPLondon20180125_TLSv1.3_Andy_Brodie.pdf
+# ref: https://www.amongbytes.com/post/201810-baby-steps-to-pq-https-server/
+# ref: https://crypto.stackexchange.com/questions/60690/what-is-the-most-popular-cipher-suite-used-in-tls-1-2-for-https
+# ref: https://clienttest.ssllabs.com:8443/ssltest/viewMyClient.html
+# ref: https://media.cert.europa.eu/static/WhitePapers/CERT-EU-SWP_16-002_Weaknesses%20in%20Diffie-Hellman%20Key%20v1_0.pdf
+# ref: https://weakdh.org/imperfect-forward-secrecy.pdf
+# ref: https://www.cs.miami.edu/home/burt/learning/Csc609.142/ecdsa-cert.pdf#page=28
+# ref: https://crypto.stackexchange.com/questions/89870/is-there-a-complete-summarized-list-of-attacks-on-diffie-hellman
+# ref: https://mailarchive.ietf.org/arch/msg/tls/CzjJB1g0uFypY8UDdr6P9SCQBqA/
+# ref: https://firefox-source-docs.mozilla.org/security/nss/legacy/key_log_format/index.html
+# ref: https://tls13.xargs.org/#wrapped-record-9/annotated
+# ref: https://8gwifi.org/PemParserFunctions.jsp
+# ref: https://cryptoctf.org/2022/09/11/writeup-of-flag-submission-forgery-by-si/
+
 DHKE_SUPPORTED_GROUPS = {
     "ffdhe2048": {
         "g": 0x02,

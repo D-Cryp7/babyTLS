@@ -6,6 +6,7 @@ import hashlib
 import struct
 
 # AES-GCM handler
+# ref: https://pycryptodome.readthedocs.io/en/latest/src/cipher/modern.html#gcm-mode
 
 def encrypt_and_digest(pt, header, key, iv):
     cipher = AES.new(bytes.fromhex(key), AES.MODE_GCM, nonce = bytes.fromhex(iv))
@@ -21,6 +22,7 @@ def decrypt_and_verify(ct, header, key, iv, tag):
 
 
 # HKDF handler
+# ref: https://github.com/casebeer/python-hkdf/blob/master/hkdf.py + CryptoHack
 
 def tls_HMAC(k, b, algorithm): # HKDF-Extract
     return bytearray(hmac.new(k, b, algorithm).digest())
@@ -53,7 +55,9 @@ def verify_data(finished_key, transcript_hash, hash_alg):
 
 # Data verification
 
-def hello_verify(hello_hash, shared_secret, HASH_ALG, HASH_LEN):
+def hello_verify(messages, shared_secret, HASH_ALG, HASH_LEN):
+    hello_hash = HASH_ALG(''.join(messages).encode()).digest()
+    
     # early_secret = HKDF-Extract(salt: 00, key: 00...)
     early_secret = tls_HMAC(bytearray((0,) * HASH_LEN), bytearray((0,) * HASH_LEN), HASH_ALG)
     # empty_hash = SHA384("")
@@ -84,7 +88,7 @@ def hello_verify(hello_hash, shared_secret, HASH_ALG, HASH_LEN):
         "server_handshake_key": server_handshake_key.hex(),
         "server_handshake_iv": server_handshake_iv.hex(),
         "client_handshake_key": client_handshake_key.hex(),
-        "server_handshake_iv": client_handshake_iv.hex()
+        "client_handshake_iv": client_handshake_iv.hex()
     }
     return result 
 

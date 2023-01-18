@@ -1,4 +1,5 @@
 from Crypto.Util.number import long_to_bytes
+from Crypto.Cipher import ChaCha20_Poly1305
 from Crypto.Cipher import AES
 from math import ceil
 import hmac
@@ -8,19 +9,35 @@ import struct
 # AES-GCM handler
 # ref: https://pycryptodome.readthedocs.io/en/latest/src/cipher/modern.html#gcm-mode
 
-def encrypt_and_digest(pt, header, key, iv):
-    cipher = AES.new(bytes.fromhex(key), AES.MODE_GCM, nonce = bytes.fromhex(iv))
-    cipher.update(bytes.fromhex(header))
-    ct, tag = cipher.encrypt_and_digest(pt)
-    return ct, tag
+class AES_GCM:
+    def encrypt_and_digest(pt, header, key, iv):
+        cipher = AES.new(bytes.fromhex(key), AES.MODE_GCM, nonce = bytes.fromhex(iv))
+        cipher.update(bytes.fromhex(header))
+        ct, tag = cipher.encrypt_and_digest(pt)
+        return ct, tag
 
-def decrypt_and_verify(ct, header, key, iv, tag):
-    cipher = AES.new(bytes.fromhex(key), AES.MODE_GCM, nonce = bytes.fromhex(iv))
-    cipher.update(bytes.fromhex(header))
-    pt = cipher.decrypt_and_verify(bytes.fromhex(ct), bytes.fromhex(tag))
-    return pt
+    def decrypt_and_verify(ct, header, key, iv, tag):
+        cipher = AES.new(bytes.fromhex(key), AES.MODE_GCM, nonce = bytes.fromhex(iv))
+        cipher.update(bytes.fromhex(header))
+        pt = cipher.decrypt_and_verify(bytes.fromhex(ct), bytes.fromhex(tag))
+        return pt
+    
+# ChaCha20-Poly1305 handler
+# ref: https://pycryptodome.readthedocs.io/en/latest/src/cipher/chacha20_poly1305.html    
 
+class CHACHA20_POLY1305:
+    def encrypt_and_digest(pt, header, key, iv):
+        cipher = ChaCha20_Poly1305.new(key = bytes.fromhex(key), nonce = bytes.fromhex(iv))
+        cipher.update(bytes.fromhex(header))
+        ct, tag = cipher.encrypt_and_digest(pt)
+        return ct, tag
 
+    def decrypt_and_verify(ct, header, key, iv, tag):
+        cipher = ChaCha20_Poly1305.new(key = bytes.fromhex(key), nonce = bytes.fromhex(iv))
+        cipher.update(bytes.fromhex(header))
+        pt = cipher.decrypt_and_verify(bytes.fromhex(ct), bytes.fromhex(tag))
+        return pt
+    
 # HKDF handler
 # ref: https://github.com/casebeer/python-hkdf/blob/master/hkdf.py + CryptoHack
 
@@ -56,6 +73,7 @@ def verify_data(finished_key, transcript_hash, hash_alg):
 # Data verification
 
 def hello_verify(messages, shared_secret, HASH_ALG, HASH_LEN):
+    # print(messages)
     hello_hash = HASH_ALG(''.join(messages).encode()).digest()
     
     # early_secret = HKDF-Extract(salt: 00, key: 00...)

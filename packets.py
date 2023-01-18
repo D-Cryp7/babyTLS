@@ -1,5 +1,6 @@
 from key_exchange import *
 from babyTLSUtil import *
+from cipher_suites import *
 from os import urandom
 import json
 
@@ -13,6 +14,7 @@ def node_hello(KEP_alg, KEP_struct):
     '''
         KEP_alg: Key exchange protocol algorithm (DHKE of ECDHKE)
         KEP_struct: Group of curve used for the KEP
+        TODO: change this function to "generate_server_hello" and add the selected cipher suite
     '''
     KEP = KEY_EXCHANGE(KEP_alg, KEP_struct)
     node_public_key = KEP.generate_public_key()
@@ -27,7 +29,26 @@ def extract_node_hello(node_hello):
     node_public_key = node_hello["Key_Share"]
     return json.dumps(node_hello), node_public_key
 
-def TLS_packet(pt, header, key, iv): # assuming AEAD like AES-GCM encryption for now
+def generate_client_hello(KEP_alg, KEP_struct, cipher_suites, temp_cipher_suite):
+    KEP = KEY_EXCHANGE(KEP_alg, KEP_struct)
+    client_public_key = KEP.generate_public_key()
+    client_hello = {
+        "Random": urandom(16).hex(),
+        "Cipher_Suites": list(cipher_suites.keys()),
+        "Temporary_Cipher_Suite": temp_cipher_suite,
+        "Key_Share": client_public_key,
+        "Key_Share_Struct": KEP_struct
+    }
+    return json.dumps(client_hello), KEP
+
+def extract_client_hello(client_hello):
+    client_hello = eval(json.loads(client_hello))
+    client_public_key = client_hello["Key_Share"]
+    client_cipher_suite = client_hello["Temporary_Cipher_Suite"] # For now, the server will select this cipher suite. In reality, the server can change it
+    client_struct = client_hello["Key_Share_Struct"]
+    return json.dumps(client_hello), client_cipher_suite, [client_public_key, client_struct]
+
+def TLS_packet(encrypt_and_digest, pt, header, key, iv): # assuming AEAD like AES-GCM encryption for now
     '''
         Encrypt a packet
     '''
